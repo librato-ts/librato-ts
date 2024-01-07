@@ -7,6 +7,13 @@ export function sanitizeMeasurementName(name: string): string {
   return name.replace(/[^a-zA-Z0-9_.:-]/g, '_').substring(0, 255);
 }
 
+export function sanitizeAnnotationStreamName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '_')
+    .substring(0, 255);
+}
+
 export function sanitizeTagName(name: string): string {
   return name.replace(/[^-.:_\w]/g, '_').substring(0, 64);
 }

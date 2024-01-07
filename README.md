@@ -38,7 +38,7 @@ librato.on('error', function (err) {
 });
 ```
 
-### Counter measurements
+## Counter measurements
 
 A value that accumulates over time – you can think of this like an odometer on a car; it only ever goes up.
 
@@ -66,7 +66,7 @@ librato.increment('foo', 1, {
 });
 ```
 
-### Gauge Measurements
+## Gauge Measurements
 
 A gauge measurement represents a snapshot of a value at a specific moment in time, like the amount of free memory on a server.
 
@@ -90,9 +90,39 @@ librato.measure('foo', 250, {
 });
 ```
 
-### Advanced
+## Annotations
 
-#### Period
+An annotation is a descriptive label or note applied to specific points in time, providing context or additional
+information about events, changes, or noteworthy occurrences within the metric data.
+
+Librato allows grouping multiple annotations under a stream name, similar to a metric name. If the stream name is
+not specified, the title will be used.
+
+```ts
+import { Librato } from 'librato-ts';
+const librato = new librato({
+  email: 'foo@bar.com',
+  token: 'ABC123',
+});
+
+librato.annotate('Noting unique period of time'); // 1024 bytes
+
+// Specify a stream name for the annotation
+librato.measure(`Deployment: ${version}`, {
+  streamName: 'product_deployments',
+});
+
+// Specify custom start and end dates for the annotation
+librato.measure('foo', {
+  streamName: 'foobar',
+  start: new Date('2020-01-01'),
+  end: new Date('2020-01-02'),
+});
+```
+
+## Advanced
+
+### Period
 
 By default, librato-ts publishes data every 60 seconds. This can be overwritten with the constructor arguments:
 
@@ -105,7 +135,7 @@ const librato = new librato({
 });
 ```
 
-#### Timeout
+### Timeout
 
 By default, attempts to publish metrics to Librato will time out after 30 seconds. This can be overwritten with the constructor arguments:
 

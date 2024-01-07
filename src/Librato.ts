@@ -8,6 +8,8 @@ import type { StrictEventEmitter } from 'strict-event-emitter-types';
 
 import { version } from '../package.json';
 
+import type { Annotation } from './Annotation';
+import { sanitizeAnnotationStreamName } from './Helpers.js';
 import type { ClientConfig, SimulateConfig } from './LibratoConfig';
 import type { Measurement, SingleMeasurement } from './measurements';
 import { CounterCollector, GaugeCollector } from './measurements/index.js';
@@ -142,6 +144,37 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
       value,
       ...optionsWithDefaults,
     });
+  }
+
+  public async annotate(title: string, options: Annotation): Promise<void> {
+    if (this.config.simulate) {
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+    const streamName = options.streamName || sanitizeAnnotationStreamName(title);
+    const startTimeSeconds = Math.round((options.startTime ?? new Date()).getTime() / 1000);
+    const endTimeSeconds = options.endTime ? Math.round(options.endTime.getTime() / 1000) : undefined;
+
+    try {
+      await this.client.post(
+        `annotations/${streamName}`,
+        {
+          title: title.substring(0, 255),
+          description: options.description,
+          start_time: startTimeSeconds,
+          end_time: endTimeSeconds,
+          source: options.source,
+          links: options.links,
+        },
+        {
+          timeout: this.config.timeout,
+          signal: AbortSignal.timeout(this.config.timeout),
+        },
+      );
+    } catch (ex) {
+      this.emit('error', ex as Error);
+    }
   }
 
   public flush(): Promise<void> | void {
