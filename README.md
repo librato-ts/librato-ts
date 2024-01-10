@@ -16,16 +16,16 @@ npm install librato-ts
 
 ### Setup
 
-Once `librato.start` is called, aggregated stats will be sent to Librato once every 60 seconds.
+Once `librato.init()` is called, aggregated stats will be sent to Librato once every 60 seconds.
 
 ```ts
 import { Librato } from 'librato-ts';
 
-const librato = new librato({
+const librato = new Librato();
+await librato.init({
   email: 'foo@bar.com',
   token: 'ABC123',
 });
-librato.start();
 
 process.once('SIGINT', async function () {
   // Send any pending metrics to Librato and stop the interval timer
@@ -38,13 +38,30 @@ librato.on('error', function (err) {
 });
 ```
 
+### Testing support
+
+To support testing scenarios and prevent metrics from leaking to Librato, you can initialize the client with the simulate option:
+
+```ts
+import { Librato } from 'librato-ts';
+
+const librato = new Librato();
+await librato.init({
+  simulate: true,
+});
+
+// This will be ignored
+librato.increment('foo');
+```
+
 ## Counter measurements
 
 A value that accumulates over time – you can think of this like an odometer on a car; it only ever goes up.
 
 ```ts
 import { Librato } from 'librato-ts';
-const librato = new librato({
+const librato = new Librato();
+await librato.increment({
   email: 'foo@bar.com',
   token: 'ABC123',
 });
@@ -72,7 +89,8 @@ A gauge measurement represents a snapshot of a value at a specific moment in tim
 
 ```ts
 import { Librato } from 'librato-ts';
-const librato = new librato({
+const librato = new Librato();
+await librato.init({
   email: 'foo@bar.com',
   token: 'ABC123',
 });
@@ -100,7 +118,8 @@ not specified, the title will be used.
 
 ```ts
 import { Librato } from 'librato-ts';
-const librato = new librato({
+const librato = new Librato();
+librato.init({
   email: 'foo@bar.com',
   token: 'ABC123',
 });
@@ -128,7 +147,8 @@ By default, librato-ts publishes data every 60 seconds. This can be overwritten 
 
 ```ts
 import { Librato } from 'librato-ts';
-const librato = new librato({
+const librato = new Librato();
+await librato.init({
   email: 'foo@bar.com',
   token: 'ABC123',
   period: 30_000, // 30 seconds
@@ -141,7 +161,8 @@ By default, attempts to publish metrics to Librato will time out after 30 second
 
 ```ts
 import { Librato } from 'librato-ts';
-const librato = new librato({
+const librato = new Librato();
+await librato.init({
   email: 'foo@bar.com',
   token: 'ABC123',
   timeout: 10_000, // 10 seconds

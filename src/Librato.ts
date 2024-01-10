@@ -23,9 +23,9 @@ type LibratoEventEmitter = StrictEventEmitter<EventEmitter, LibratoEvents>;
 type MeasurementOptions = Omit<Measurement, 'name'>;
 
 export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
-  private client: AxiosInstance;
+  private client: AxiosInstance | undefined;
 
-  private config: SimulateConfig | (ClientConfig & Required<Pick<ClientConfig, 'period' | 'timeout'>>);
+  private config: SimulateConfig | (ClientConfig & Required<Pick<ClientConfig, 'period' | 'timeout'>>) | undefined;
 
   private counterCollector = new CounterCollector();
 
@@ -35,14 +35,22 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
 
   private startTimeout?: NodeJS.Timeout;
 
-  public constructor(config: ClientConfig | SimulateConfig) {
-    super();
+  /**
+   * Initializes the Librato client and starts sending measurements to Librato.
+   * @param {object} config
+   */
+  public init(config: ClientConfig | SimulateConfig): Promise<void> | void {
+    this.isEnding = false;
 
     this.config = {
       period: 60_000,
       timeout: 30_000,
       ...(config as ClientConfig),
     };
+
+    if (config.simulate) {
+      return;
+    }
 
     this.client = axios.create({
       baseURL: 'https://metrics-api.librato.com/v1',
@@ -58,17 +66,6 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
     axiosRetry(this.client, {
       retryDelay: (retryCount) => axiosRetry.exponentialDelay(retryCount),
     });
-  }
-
-  /**
-   * Starts sending measurements to Librato.
-   */
-  public start(): Promise<void> | void {
-    this.isEnding = false;
-
-    if (this.config.simulate) {
-      return;
-    }
 
     // Try to sync when metrics are sent to Librato so periods match across systems
     const now = Date.now();
@@ -100,7 +97,7 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
    * @param {object} options
    */
   public increment(name: string, value: MeasurementOptions | number = 1, options?: MeasurementOptions): void {
-    if (this.config.simulate) {
+    if (this.config?.simulate) {
       return;
     }
 
@@ -110,7 +107,7 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
     }
 
     const optionsWithDefaults: MeasurementOptions = {
-      source: this.config.source,
+      source: this.config?.source,
       time: Date.now(),
       ...options,
     };
@@ -129,12 +126,12 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
    * @param {object} options
    */
   public measure(name: string, value: number, options?: MeasurementOptions): void {
-    if (this.config.simulate) {
+    if (this.config?.simulate) {
       return;
     }
 
     const optionsWithDefaults: MeasurementOptions = {
-      source: this.config.source,
+      source: this.config?.source,
       time: Date.now(),
       ...options,
     };
@@ -147,7 +144,12 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
   }
 
   public async annotate(title: string, options: Annotation): Promise<void> {
-    if (this.config.simulate) {
+    if (this.config?.simulate) {
+      return;
+    }
+
+    if (!this.config || !this.client) {
+      this.emit('error', new Error('Please call init() before calling annotate()'));
       return;
     }
 
@@ -178,7 +180,7 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
   }
 
   public flush(): Promise<void> | void {
-    if (this.config.simulate) {
+    if (!this.config || !this.client || this.config.simulate) {
       return;
     }
 
@@ -193,7 +195,7 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
   }
 
   public async _sendMetrics({ counters, gauges }: { counters: SingleMeasurement[]; gauges: Measurement[] }): Promise<void> {
-    if (this.config.simulate) {
+    if (!this.config || !this.client || this.config.simulate) {
       return;
     }
 
@@ -224,7 +226,12 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
   }
 
   private async run(runTime: number): Promise<void> {
-    if (this.config.simulate) {
+    if (this.config?.simulate) {
+      return;
+    }
+
+    if (!this.config) {
+      this.emit('error', new Error('Please call init()'));
       return;
     }
 
