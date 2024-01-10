@@ -22,7 +22,7 @@ Once `librato.init()` is called, aggregated stats will be sent to Librato once e
 import { Librato } from 'librato-ts';
 
 const librato = new Librato();
-await librato.init({
+librato.init({
   email: 'foo@bar.com',
   token: 'ABC123',
 });
@@ -46,7 +46,7 @@ To support testing scenarios and prevent metrics from leaking to Librato, you ca
 import { Librato } from 'librato-ts';
 
 const librato = new Librato();
-await librato.init({
+librato.init({
   simulate: true,
 });
 
@@ -90,7 +90,7 @@ A gauge measurement represents a snapshot of a value at a specific moment in tim
 ```ts
 import { Librato } from 'librato-ts';
 const librato = new Librato();
-await librato.init({
+librato.init({
   email: 'foo@bar.com',
   token: 'ABC123',
 });
@@ -148,7 +148,7 @@ By default, librato-ts publishes data every 60 seconds. This can be overwritten 
 ```ts
 import { Librato } from 'librato-ts';
 const librato = new Librato();
-await librato.init({
+librato.init({
   email: 'foo@bar.com',
   token: 'ABC123',
   period: 30_000, // 30 seconds
@@ -162,7 +162,7 @@ By default, attempts to publish metrics to Librato will time out after 30 second
 ```ts
 import { Librato } from 'librato-ts';
 const librato = new Librato();
-await librato.init({
+librato.init({
   email: 'foo@bar.com',
   token: 'ABC123',
   timeout: 10_000, // 10 seconds

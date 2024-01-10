@@ -13,7 +13,7 @@ describe('Librato', () => {
 
   it('should not send metrics if simulate=true', async () => {
     const librato = new Librato();
-    await librato.init({
+    librato.init({
       simulate: true,
     });
     const sendMetricsStub = sinon.stub(librato, '_sendMetrics').resolves();
@@ -33,7 +33,7 @@ describe('Librato', () => {
     librato.increment('test');
     librato.measure('foo', 42);
 
-    await librato.init({
+    librato.init({
       email: '',
       token: '',
     });
@@ -50,30 +50,77 @@ describe('Librato', () => {
     sendMetricsStub.firstCall.args[0].gauges[0].name.should.equal('foo');
     (sendMetricsStub.firstCall.args[0].gauges[0] as SingleMeasurement).value.should.equal(42);
   });
-  it('should accumulate metrics even if not started', async () => {
-    const librato = new Librato();
-    await librato.init({
-      email: '',
-      token: '',
+  describe('increment', () => {
+    it('should allow increment with options', async () => {
+      const librato = new Librato();
+      librato.init({
+        email: '',
+        token: '',
+      });
+      const sendMetricsStub = sinon.stub(librato, '_sendMetrics').resolves();
+
+      librato.increment('test', {
+        source: 'foo',
+      });
+
+      await librato.flush();
+
+      sendMetricsStub.restore();
+      sendMetricsStub.calledOnce.should.equal(true);
+      sendMetricsStub.restore();
+      sendMetricsStub.calledOnce.should.equal(true);
+      sendMetricsStub.firstCall.args[0].counters.should.have.length(1);
+      assert(sendMetricsStub.firstCall.args[0].counters[0]);
+      sendMetricsStub.firstCall.args[0].counters[0].name.should.equal('test');
+      sendMetricsStub.firstCall.args[0].counters[0].value.should.equal(1);
+      assert(sendMetricsStub.firstCall.args[0].counters[0].source);
+      sendMetricsStub.firstCall.args[0].counters[0].source.should.equal('foo');
     });
-    const sendMetricsStub = sinon.stub(librato, '_sendMetrics').resolves();
+    it('should allow increment with a custom value', async () => {
+      const librato = new Librato();
+      librato.init({
+        email: '',
+        token: '',
+      });
+      const sendMetricsStub = sinon.stub(librato, '_sendMetrics').resolves();
 
-    librato.increment('test');
-    librato.measure('foo', 42);
+      librato.increment('test', 42);
 
-    await librato.flush();
+      await librato.flush();
 
-    sendMetricsStub.restore();
-    sendMetricsStub.calledOnce.should.equal(true);
-    sendMetricsStub.restore();
-    sendMetricsStub.calledOnce.should.equal(true);
-    sendMetricsStub.firstCall.args[0].counters.should.have.length(1);
-    assert(sendMetricsStub.firstCall.args[0].counters[0]);
-    sendMetricsStub.firstCall.args[0].counters[0].name.should.equal('test');
-    sendMetricsStub.firstCall.args[0].counters[0].value.should.equal(1);
-    sendMetricsStub.firstCall.args[0].gauges.should.have.length(1);
-    assert(sendMetricsStub.firstCall.args[0].gauges[0]);
-    sendMetricsStub.firstCall.args[0].gauges[0].name.should.equal('foo');
-    (sendMetricsStub.firstCall.args[0].gauges[0] as SingleMeasurement).value.should.equal(42);
+      sendMetricsStub.restore();
+      sendMetricsStub.calledOnce.should.equal(true);
+      sendMetricsStub.restore();
+      sendMetricsStub.calledOnce.should.equal(true);
+      sendMetricsStub.firstCall.args[0].counters.should.have.length(1);
+      assert(sendMetricsStub.firstCall.args[0].counters[0]);
+      sendMetricsStub.firstCall.args[0].counters[0].name.should.equal('test');
+      sendMetricsStub.firstCall.args[0].counters[0].value.should.equal(42);
+    });
+    it('should allow increment with a custom value and options', async () => {
+      const librato = new Librato();
+      librato.init({
+        email: '',
+        token: '',
+      });
+      const sendMetricsStub = sinon.stub(librato, '_sendMetrics').resolves();
+
+      librato.increment('test', 42, {
+        source: 'foo',
+      });
+
+      await librato.flush();
+
+      sendMetricsStub.restore();
+      sendMetricsStub.calledOnce.should.equal(true);
+      sendMetricsStub.restore();
+      sendMetricsStub.calledOnce.should.equal(true);
+      sendMetricsStub.firstCall.args[0].counters.should.have.length(1);
+      assert(sendMetricsStub.firstCall.args[0].counters[0]);
+      sendMetricsStub.firstCall.args[0].counters[0].name.should.equal('test');
+      sendMetricsStub.firstCall.args[0].counters[0].value.should.equal(42);
+      assert(sendMetricsStub.firstCall.args[0].counters[0].source);
+      sendMetricsStub.firstCall.args[0].counters[0].source.should.equal('foo');
+    });
   });
 });

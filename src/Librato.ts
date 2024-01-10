@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import { setTimeout } from 'node:timers/promises';
+import { setTimeout } from 'node:timers';
 
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
@@ -39,7 +39,7 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
    * Initializes the Librato client and starts sending measurements to Librato.
    * @param {object} config
    */
-  public init(config: ClientConfig | SimulateConfig): Promise<void> | void {
+  public init(config: ClientConfig | SimulateConfig): void {
     this.isEnding = false;
 
     this.config = {
@@ -71,7 +71,10 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
     const now = Date.now();
     const startTime = now + (this.config.period - (now % this.config.period));
 
-    return this.run(startTime);
+    clearTimeout(this.startTimeout);
+    this.startTimeout = setTimeout(() => {
+      this.run(startTime).catch((ex) => this.emit('error', ex as Error));
+    }, startTime - now);
   }
 
   /**
@@ -90,6 +93,13 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
    * @param {object} options
    */
   public increment(name: string, options?: MeasurementOptions): void;
+  /**
+   * Increment a value that accumulates over time – you can think of this like an odometer on a car; it only ever goes up.
+   * @param {string} name - Name of the metric
+   * @param {number} value - Amount to increment by
+   * @param {object} options
+   */
+  public increment(name: string, value: number, options?: MeasurementOptions): void;
   /**
    * Increment a value that accumulates over time – you can think of this like an odometer on a car; it only ever goes up.
    * @param {string} name - Name of the metric
@@ -249,12 +259,11 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
 
       const now = Date.now();
       if (nextRunTime > now) {
-        this.startTimeout = await setTimeout(nextRunTime - Date.now());
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (!this.isEnding) {
-        await this.run(nextRunTime);
+        this.startTimeout = setTimeout(() => {
+          if (!this.isEnding) {
+            this.run(nextRunTime).catch((ex) => this.emit('error', ex as Error));
+          }
+        }, nextRunTime - Date.now());
       }
     }
   }

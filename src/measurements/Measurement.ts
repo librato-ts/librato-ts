@@ -13,7 +13,7 @@ export interface Measurement {
   period?: number;
   /**
    * Source dimension
-   * @deprecated - Legacy approach for adding a dimension to a metric. Accounts created after January 24th, 2017 12:00 PST should use tags instead. See https://www.librato.com/docs/kb/faq/account_questions/tags_or_sources/ for more information.
+   * NOTE: This is a legacy approach for adding a dimension to a metric. Accounts created after January 24th, 2017 12:00 PST should use tags instead. See https://www.librato.com/docs/kb/faq/account_questions/tags_or_sources/ for more information.
    */
   source?: string;
   /**
