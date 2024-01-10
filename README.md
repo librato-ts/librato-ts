@@ -61,7 +61,7 @@ A value that accumulates over time – you can think of this like an odometer on
 ```ts
 import { Librato } from 'librato-ts';
 const librato = new Librato();
-await librato.increment({
+librato.init({
   email: 'foo@bar.com',
   token: 'ABC123',
 });
@@ -124,7 +124,7 @@ librato.init({
   token: 'ABC123',
 });
 
-librato.annotate('Noting unique period of time'); // 1024 bytes
+librato.annotate('Noting unique period of time');
 
 // Specify a stream name for the annotation
 librato.measure(`Deployment: ${version}`, {
