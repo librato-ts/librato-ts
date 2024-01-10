@@ -7,6 +7,10 @@ export interface ClientConfig {
   email: string;
   token: string;
   /**
+   * Metric name prefix to apply to all measurements
+   */
+  prefix?: string;
+  /**
    * Amount of time in milliseconds to wait between flushes. Default is 60s
    */
   period?: number;

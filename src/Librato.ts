@@ -113,7 +113,7 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
     };
 
     this.counterCollector.increment({
-      name,
+      name: `${this.config?.prefix ?? ''}${name}`,
       value,
       ...optionsWithDefaults,
     });
@@ -137,7 +137,7 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
     };
 
     this.gaugeCollector.measure({
-      name,
+      name: `${this.config?.prefix ?? ''}${name}`,
       value,
       ...optionsWithDefaults,
     });
