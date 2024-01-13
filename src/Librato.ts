@@ -44,7 +44,7 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
 
     this.config = {
       period: 60_000,
-      timeout: 30_000,
+      timeout: 59_000,
       ...(config as ClientConfig),
     };
 
@@ -65,6 +65,7 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
     });
     axiosRetry(this.client, {
       retryDelay: (retryCount) => axiosRetry.exponentialDelay(retryCount),
+      shouldResetTimeout: true,
     });
 
     // Try to sync when metrics are sent to Librato so periods match across systems
@@ -181,7 +182,8 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
         },
         {
           timeout: this.config.timeout,
-          signal: AbortSignal.timeout(this.config.timeout),
+          // Set abort signal equal to the total time of first request, all retries (3), and the max delay period between retries (960ms per retry)
+          signal: AbortSignal.timeout(this.config.timeout * 4 + 3000),
         },
       );
     } catch (ex) {
@@ -227,7 +229,8 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
         },
         {
           timeout: this.config.timeout,
-          signal: AbortSignal.timeout(this.config.timeout),
+          // Set abort signal equal to the total time of first request, all retries (3), and the max delay period between retries (960ms per retry)
+          signal: AbortSignal.timeout(this.config.timeout * 4 + 3000),
         },
       );
     } catch (ex) {

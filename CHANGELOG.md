@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.3.1 - 2024-01-12
+
+- Bump default timeout to 59s
+- Reset the timeout for each retry attempt
+- Set the abort signal on the request to Librato to be the max amount of time for all retries
+
 ## 1.3.0 - 2024-01-10
 
 - Add additional method overload for `increment` to allow for a value and no options object
