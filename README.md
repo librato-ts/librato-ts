@@ -157,7 +157,7 @@ librato.init({
 
 ### Timeout
 
-By default, attempts to publish metrics to Librato will time out after 30 seconds. This can be overwritten with the constructor arguments:
+By default, attempts to publish metrics to Librato will time out after 59 seconds. This can be overwritten with the constructor arguments:
 
 ```ts
 import { Librato } from 'librato-ts';
