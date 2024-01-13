@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.4.0 - 2024-01-13
+
+- Add `sending` and `sent` events to the Librato class, to allow for listening to when data is sent to Librato
+
 ## 1.3.1 - 2024-01-12
 
 - Bump default timeout to 59s

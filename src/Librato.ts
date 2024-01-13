@@ -9,18 +9,32 @@ import type { StrictEventEmitter } from 'strict-event-emitter-types';
 import { version } from '../package.json';
 
 import type { Annotation } from './Annotation';
-import { sanitizeAnnotationStreamName } from './Helpers.js';
+import { getMillisecondsFromHrTime, sanitizeAnnotationStreamName } from './Helpers.js';
 import type { ClientConfig, SimulateConfig } from './LibratoConfig';
 import type { Measurement, SingleMeasurement } from './measurements';
 import { CounterCollector, GaugeCollector } from './measurements/index.js';
 
 interface LibratoEvents {
   error: (error: Error) => void;
+  sending: (args: SendMetricsParams) => void;
+  sent: (args: SentMetricsParams) => void;
 }
 
 type LibratoEventEmitter = StrictEventEmitter<EventEmitter, LibratoEvents>;
 
 type MeasurementOptions = Omit<Measurement, 'name'>;
+
+interface SendMetricsParams {
+  counters: SingleMeasurement[];
+  gauges: Measurement[];
+}
+
+interface SentMetricsParams extends SendMetricsParams {
+  /**
+   * Duration in milliseconds of the request to Librato
+   */
+  duration: number;
+}
 
 export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
   private client: AxiosInstance | undefined;
@@ -206,7 +220,7 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
     return this._sendMetrics({ counters, gauges });
   }
 
-  public async _sendMetrics({ counters, gauges }: { counters: SingleMeasurement[]; gauges: Measurement[] }): Promise<void> {
+  public async _sendMetrics({ counters, gauges }: SendMetricsParams): Promise<void> {
     if (!this.config || !this.client || this.config.simulate) {
       return;
     }
@@ -219,6 +233,10 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
     if (!counters.length && !gauges.length) {
       return;
     }
+
+    this.emit('sending', { counters, gauges });
+
+    const startTime = process.hrtime();
 
     try {
       await this.client.post(
@@ -233,6 +251,9 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
           signal: AbortSignal.timeout(this.config.timeout * 4 + 3000),
         },
       );
+
+      const duration = getMillisecondsFromHrTime(startTime);
+      this.emit('sent', { counters, gauges, duration });
     } catch (ex) {
       this.emit('error', ex as Error);
     }
