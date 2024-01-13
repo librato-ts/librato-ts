@@ -24,12 +24,12 @@ type LibratoEventEmitter = StrictEventEmitter<EventEmitter, LibratoEvents>;
 
 type MeasurementOptions = Omit<Measurement, 'name'>;
 
-interface SendMetricsParams {
+export interface SendMetricsParams {
   counters: SingleMeasurement[];
   gauges: Measurement[];
 }
 
-interface SentMetricsParams extends SendMetricsParams {
+export interface SentMetricsParams extends SendMetricsParams {
   /**
    * Duration in milliseconds of the request to Librato
    */
