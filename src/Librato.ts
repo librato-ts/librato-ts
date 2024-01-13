@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 import { setTimeout } from 'node:timers';
 
-import type { AxiosInstance } from 'axios';
+import type { AxiosError, AxiosInstance } from 'axios';
 import axios from 'axios';
 import axiosRetry from 'axios-retry';
 import type { StrictEventEmitter } from 'strict-event-emitter-types';
@@ -39,7 +39,7 @@ export interface SentMetricsParams extends SendMetricsParams {
 export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
   private client: AxiosInstance | undefined;
 
-  private config: SimulateConfig | (ClientConfig & Required<Pick<ClientConfig, 'period' | 'timeout'>>) | undefined;
+  private config: SimulateConfig | (ClientConfig & Required<Pick<ClientConfig, 'period' | 'retryCount' | 'timeout'>>) | undefined;
 
   private counterCollector = new CounterCollector();
 
@@ -59,6 +59,7 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
     this.config = {
       period: 60_000,
       timeout: 59_000,
+      retryCount: 3,
       ...(config as ClientConfig),
     };
 
@@ -78,8 +79,24 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
       },
     });
     axiosRetry(this.client, {
+      retries: this.config.retryCount,
       retryDelay: (retryCount) => axiosRetry.exponentialDelay(retryCount),
       shouldResetTimeout: true,
+      retryCondition(error: AxiosError) {
+        if (axiosRetry.isNetworkOrIdempotentRequestError(error)) {
+          return true;
+        }
+
+        if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+          return true;
+        }
+
+        if (error.response && error.response.status >= 500 && error.response.status <= 599) {
+          return true;
+        }
+
+        return false;
+      },
     });
 
     // Try to sync when metrics are sent to Librato so periods match across systems
@@ -196,8 +213,8 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
         },
         {
           timeout: this.config.timeout,
-          // Set abort signal equal to the total time of first request, all retries (3), and the max delay period between retries (960ms per retry)
-          signal: AbortSignal.timeout(this.config.timeout * 4 + 3000),
+          // Set abort signal equal to the total time of first request, all retries, and the max delay period between retries (960ms per retry)
+          signal: AbortSignal.timeout(this.config.timeout * (this.config.retryCount + 1) + 3000),
         },
       );
     } catch (ex) {

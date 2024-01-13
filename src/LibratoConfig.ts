@@ -19,6 +19,10 @@ export interface ClientConfig {
    */
   timeout?: number;
   /**
+   * Number of times to retry sending metrics to Librato. Default is 3
+   */
+  retryCount?: number;
+  /**
    * Source dimension to apply to all measurements
    */
   source?: string;

@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.4.2 - 2024-01-13
+
+- Retry requests that timeout or when connection aborts
+- Allow configurable retry attempt count
+
 ## 1.4.1 - 2024-01-13
 
 - Export interfaces for `sending` and `sent` event parameters
