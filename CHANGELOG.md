@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.4.3 - 2024-02-07
+
+- Update npms
+
 ## 1.4.2 - 2024-01-13
 
 - Retry requests that timeout or when connection aborts
