@@ -105,7 +105,7 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
 
     clearTimeout(this.startTimeout);
     this.startTimeout = setTimeout(() => {
-      this.run(startTime).catch((ex) => this.emit('error', ex as Error));
+      this.run(startTime).catch((ex: unknown) => this.emit('error', ex as Error));
     }, startTime - now);
   }
 
@@ -302,7 +302,7 @@ export class Librato extends (EventEmitter as new () => LibratoEventEmitter) {
       if (nextRunTime > now) {
         this.startTimeout = setTimeout(() => {
           if (!this.isEnding) {
-            this.run(nextRunTime).catch((ex) => this.emit('error', ex as Error));
+            this.run(nextRunTime).catch((ex: unknown) => this.emit('error', ex as Error));
           }
         }, nextRunTime - Date.now());
       }
