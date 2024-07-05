@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.4.7 - 2024-07-05
+
+- Update npms
+
 ## 1.4.6 - 2024-05-13
 
 - Update npms
