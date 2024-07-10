@@ -1,4 +1,4 @@
-import type { Measurement } from './Measurement';
+import type { Measurement } from './Measurement.js';
 
 export interface GaugeAggregateMeasurement extends Measurement {
   /**

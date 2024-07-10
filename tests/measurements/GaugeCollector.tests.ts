@@ -1,9 +1,10 @@
-import chai from 'chai';
+import * as chai from 'chai';
 
 import { GaugeCollector } from '../../src/measurements/index.js';
 
 describe('GaugeCollector', () => {
   const { expect } = chai;
+
   before(() => {
     chai.should();
   });
@@ -34,6 +35,7 @@ describe('GaugeCollector', () => {
       },
     ]);
   });
+
   it('should accumulate metrics separately if they have different sources', () => {
     const collector = new GaugeCollector();
     collector.measure({
@@ -61,6 +63,7 @@ describe('GaugeCollector', () => {
       },
     ]);
   });
+
   it('should clear cached metrics after flush', () => {
     const collector = new GaugeCollector();
     collector.measure({

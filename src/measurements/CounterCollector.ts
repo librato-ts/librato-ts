@@ -1,7 +1,7 @@
-import { sanitizeMeasurementName, sanitizeTags } from '../Helpers';
+import { sanitizeMeasurementName, sanitizeTags } from '../Helpers.js';
 
-import type { Measurement } from './Measurement';
-import type { SingleMeasurement } from './SingleMeasurement';
+import type { Measurement } from './Measurement.js';
+import type { SingleMeasurement } from './SingleMeasurement.js';
 
 export class CounterCollector {
   private cache = new Map<string, SingleMeasurement>();

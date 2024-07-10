@@ -1,7 +1,7 @@
-import { sanitizeMeasurementName, sanitizeTags } from '../Helpers';
+import { sanitizeMeasurementName, sanitizeTags } from '../Helpers.js';
 
-import type { GaugeAggregateMeasurement } from './GaugeAggregateMeasurement';
-import type { SingleMeasurement } from './SingleMeasurement';
+import type { GaugeAggregateMeasurement } from './GaugeAggregateMeasurement.js';
+import type { SingleMeasurement } from './SingleMeasurement.js';
 
 type Measurement = GaugeAggregateMeasurement | SingleMeasurement;
 

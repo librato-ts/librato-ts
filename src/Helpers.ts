@@ -4,22 +4,22 @@ export function getMillisecondsFromHrTime(hrtime: [number, number]): number {
 }
 
 export function sanitizeMeasurementName(name: string): string {
-  return name.replace(/[^a-zA-Z0-9_.:-]/g, '_').substring(0, 255);
+  return name.replace(/[^\w.:-]/g, '_').substring(0, 255);
 }
 
 export function sanitizeAnnotationStreamName(name: string): string {
   return name
     .toLowerCase()
-    .replace(/[^a-z0-9]/g, '_')
+    .replace(/[^\da-z]/g, '_')
     .substring(0, 255);
 }
 
 export function sanitizeTagName(name: string): string {
-  return name.replace(/[^-.:_\w]/g, '_').substring(0, 64);
+  return name.replace(/[^\w.:-]/g, '_').substring(0, 64);
 }
 
 export function sanitizeTagValue(name: string): string {
-  return name.replace(/[^-.:_?\\/\w ]/g, '').substring(0, 255);
+  return name.replace(/[^\w ./:?\\-]/g, '').substring(0, 255);
 }
 
 export function sanitizeTags(tags?: Record<string, string>): Record<string, string> | undefined {

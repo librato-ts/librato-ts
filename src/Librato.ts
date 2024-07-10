@@ -8,10 +8,10 @@ import type { StrictEventEmitter } from 'strict-event-emitter-types';
 
 import { version } from '../package.json';
 
-import type { Annotation } from './Annotation';
+import type { Annotation } from './Annotation.js';
 import { getMillisecondsFromHrTime, sanitizeAnnotationStreamName } from './Helpers.js';
-import type { ClientConfig, SimulateConfig } from './LibratoConfig';
-import type { Measurement, SingleMeasurement } from './measurements';
+import type { ClientConfig, SimulateConfig } from './LibratoConfig.js';
+import type { Measurement, SingleMeasurement } from './measurements/index.js';
 import { CounterCollector, GaugeCollector } from './measurements/index.js';
 
 interface LibratoEvents {

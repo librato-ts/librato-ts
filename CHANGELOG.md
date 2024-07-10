@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.5.0 - 2024-07-10
+
+- Update eslint to use flat config
+- Update npms
+
 ## 1.4.6 - 2024-05-13
 
 - Update npms

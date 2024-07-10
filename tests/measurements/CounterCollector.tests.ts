@@ -1,9 +1,10 @@
-import chai from 'chai';
+import * as chai from 'chai';
 
 import { CounterCollector } from '../../src/measurements/index.js';
 
 describe('CounterCollector', () => {
   const { expect } = chai;
+
   before(() => {
     chai.should();
   });
@@ -28,6 +29,7 @@ describe('CounterCollector', () => {
       },
     ]);
   });
+
   it('should accumulate metrics separately if they have different sources', () => {
     const collector = new CounterCollector();
     collector.increment({
@@ -54,6 +56,7 @@ describe('CounterCollector', () => {
       },
     ]);
   });
+
   it('should clear cached metrics after flush', () => {
     const collector = new CounterCollector();
     collector.increment({
